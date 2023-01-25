@@ -1,0 +1,16 @@
+[
+    {
+        "start_location": "hendon",
+        "end_location": "tottenham",
+        "ETA": 30,
+        "route": [
+            "Brent",
+            "Golders",
+            "Hampstead",
+            "..."
+        ],
+        "optional_parameters": {
+            "accessibility": false
+        }
+    }
+]
