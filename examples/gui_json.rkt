@@ -34,7 +34,10 @@
             [parent this]
             [label "Save to JSON"]
             [callback (lambda(o e)
-                (set! data #hasheq((fname . (bytes->jsexpr name)) (dobb . (bytes->jsexpr dob))))
+                (set! data (make-hasheq `(
+                    (name ., name)
+                    (dob ., dob)
+                )))
                 (send this write-json-wrapper data filename)
             )]
         ))

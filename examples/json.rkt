@@ -10,6 +10,14 @@
     (optional_parameters . #hasheq((accessibility . #f)))
 ))
 
+(define c (make-hasheq 
+    `((start. , x)
+        (end., x)
+    )
+))
+
+(define d (hash 'start x))
+
 
 ;(display a)
 ;(hash-ref a "start_location")
@@ -26,5 +34,5 @@
     (call-with-input-file filename read-json)
 ))
 
-(write-json-wrapper b "save.json")
+(write-json-wrapper c "save.json")
 ;(read-json-wrapper "save.json")
