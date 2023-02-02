@@ -1,6 +1,6 @@
 #lang racket/gui
 (define mainpageframe(new frame%
-                        [label "Route Planner"][width 600][height 1800][stretchable-height #f][stretchable-width #f]
+                        [label "Route Planner"][width 400][height 600][stretchable-height #t][stretchable-width #t]
 ))
 (define save-search%(class vertical-panel%
                         (super-new)
