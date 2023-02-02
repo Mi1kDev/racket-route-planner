@@ -14,11 +14,11 @@
 ))
 (define start-destination-arrival-departure%(class horizontal-panel%
                                               (super-new)
-                                              (define start(new text-field%[parent this][label #f][init-value "Start"]))
-                                              (define destination(new text-field%[parent this][label #f][init-value "Destination"]))
+                                              (define start(new text-field%[parent this][label #f][init-value ""]))
+                                              (define destination(new text-field%[parent this][label #f][init-value ""]))
                                               (new message%[parent this][horiz-margin 50][label ""])
-                                              (define arrival(new text-field%[parent this][label #f][init-value "Arrival"]))
-                                              (define departure(new text-field%[parent this][label #f][init-value "Departure"]))
+                                              (define arrival(new text-field%[parent this][label #f][init-value ""]))
+                                              (define departure(new text-field%[parent this][label #f][init-value ""]))
 ))
 (define firstscreen%(class vertical-panel%
                       (super-new)
