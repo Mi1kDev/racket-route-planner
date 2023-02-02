@@ -1,0 +1,102 @@
+#lang racket/gui
+
+(require "route-find.rkt")
+
+(define root (new frame%
+    [label "Route Planner"]
+    [width 400]
+    [height 600]
+    [stretchable-height #f][stretchable-width #f]
+))
+
+(define mainmenu% (class vertical-panel%
+    (super-new)
+    (init-field (route (new route-finder%)))
+    (init-field (found-routes #f))
+    (init-field (currentStart ""))
+    (init-field (currentDest ""))
+    (init-field (dummyData
+        (list
+            (list "12:20" "12:45" "13:30")
+            (list "10 min" "23 min" "35 min")
+            (list "Leicester Square - King's Cross - Holloway Road" "Waterloo - Leicester - Tottenham" "Bank - Elephant&Castle - Kennington")
+        )
+    ))
+    (define/private findRoutes (lambda (s d)
+        (cond
+            [(not (and (equal? currentStart s) (equal? currentDest d))) (set! currentStart s) (set! currentDest d) (println "RUN") (set! found-routes (send route run s d))]
+        )
+    ))
+    (define/public getRoutes (lambda()
+        (findRoutes (send sdbar getValue "s") (send sdbar getValue "des"))
+        (cond
+            [(not (equal? #f found-routes)) (send sr addChildren found-routes)]
+        )
+    ))
+    (new button% [parent this] [label "Saved Routes"])
+    (define timetable (new list-box%
+        [label ""]
+        [parent (new horizontal-panel% [parent this])]
+        [choices (list)]
+        [style (list 'single 'column-headers 'vertical-label 'variable-columns)]
+        [min-height 100]
+        [horiz-margin 50]
+        [columns (list "Time" "Route Time" "Stops To Come")]
+    ))
+    (send/apply timetable set dummyData)
+    (define start-destination-bar% (class horizontal-panel%
+        (super-new)
+        (define start (new text-field%[parent this][label ""][init-value ""]))
+        (define destination (new text-field%[parent this][label ""][init-value ""]))
+        (new message%[parent this][horiz-margin 50][label ""])
+        (define arrival (new text-field%[parent this][label ""][init-value ""]))
+        (define departure(new text-field%[parent this][label ""][init-value ""]))
+
+        (define/public getValue (lambda (x)
+            (cond
+                [(equal? x "s") (send start get-value)]
+                [(equal? x "a") (send arrival get-value)]
+                [(equal? x "des") (send destination get-value)]
+                [(equal? x "dep") (send departure get-value)]
+            )
+        ))
+    ))
+    (define sdbar (new start-destination-bar%[parent this][horiz-margin 50][vert-margin 10]))
+    (define filters-buttons% (class horizontal-panel%
+        (super-new)
+        (define bus(new check-box%[parent this][label "Bus"]))
+        (define train(new check-box%[parent this][label "Train"]))
+        (define cab(new check-box%[parent this][label "Cab"]))
+        (new message%[parent this][horiz-margin 10][label ""])
+        (define accessiblity(new check-box%[parent this][label "Wheelchair Accessible"]))
+        (new message%[parent this][horiz-margin 10][label ""])
+        (define save-search% (class vertical-panel%
+            (super-new)
+            (define searchButton (new button% [parent this][label "Search"][callback (lambda (o e) (search))]))
+            (define saveButton (new button%[parent this][label "Save"]))
+            (define/private search (lambda ()
+                (send (send (send this get-parent) get-parent) getRoutes)
+            ))
+        ))
+        (new save-search% [parent this])
+    ))
+    (define fb (new filters-buttons% [parent this][horiz-margin 50]))
+    (define search-results% (class vertical-panel%
+        (super-new)
+        (define/public addChildren (lambda (results)
+            (clearAll)
+            (for ([i results])
+                (new button% [label i] [parent this])
+            )
+        ))
+        (define/private clearAll (lambda ()
+            (for ([child (send this get-children)])
+                (send this delete-child child)
+            )
+        ))
+    ))
+    (define sr (new search-results% [parent this][style (list 'border 'vscroll)][min-height 100][vert-margin 10][horiz-margin 50]))
+))
+
+(define y (new mainmenu% [parent root][vert-margin 50]))
+(send root show #t)

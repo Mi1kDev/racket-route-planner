@@ -28,6 +28,7 @@
     ))
 
     (define/private getAllPaths (lambda (s d visited path)
+        (set! returnPath '())
         (set! visited (list-set visited s #t))
         (set! path (append path (list s)))
         (cond
@@ -45,17 +46,21 @@
     ))
 
     (define/public printReturnPaths (lambda ()
-        (cond
-            [(empty? returnPath) "There is no path between these stations."]
-            [#t (for ([i (in-range (length returnPath))])
-                (for ([j (in-range (length (list-ref returnPath i)))])
-                    (set! stringPath (string-append stringPath (list-ref names (list-ref (list-ref returnPath i) j)) " > "))
-                )
-                (cons stringPath convertedPath)
-                (println stringPath)
-                (set! stringPath "")
-                
-            )]
+        (let ((newPath '()))
+            (cond
+                [(empty? returnPath) "There is no path between these stations."]
+                [#t (for ([i (in-range (length returnPath))])
+                    (for ([j (in-range (length (list-ref returnPath i)))])
+                        (cond
+                            [(not (equal? (list-ref (list-ref returnPath i) j) (last (list-ref returnPath i)))) (set! stringPath (string-append stringPath (list-ref names (list-ref (list-ref returnPath i) j)) " > "))]
+                            [else (set! stringPath (string-append stringPath (list-ref names (list-ref (list-ref returnPath i) j))))]
+                        )
+                    )
+                    (set! newPath (cons stringPath newPath))
+                    (set! stringPath "")
+                    
+                )newPath]
+            )
         )
     ))
 
@@ -65,13 +70,14 @@
         (let ((visited (populate v #f)) (path '()))
             (cond
                 [(and (isMember? (string-downcase s) names)(isMember? (string-downcase d) names))
-                    (getAllPaths (index-of names (string-downcase s)) (index-of names (string-downcase d)) visited path)]
-                [#t "Invalid station name. Perhaps check your spelling?"]
+                    (getAllPaths (index-of names (string-downcase s)) (index-of names (string-downcase d)) visited path) (send this printReturnPaths)]
+                [#t #f]
             )
         )
     ))
 ))
 
-(define runner (new route-finder%))
-(send runner run "King's Cross St. Pancras" "Kennington")
-(send runner printReturnPaths)
+;(define runner (new route-finder%))
+;(send runner run "King's Cross St. Pancras" "Kennington")
+
+(provide route-finder%)
