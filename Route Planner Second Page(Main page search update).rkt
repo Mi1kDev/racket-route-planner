@@ -1,6 +1,15 @@
 #lang racket/gui
 (define mainpageframe(new frame%
-                        [label "Route Planner"][width 600][height 1800][stretchable-height #f][stretchable-width #f]
+                        [label "Route Planner"][width 400][height 600][stretchable-height #t][stretchable-width #t]
+))
+(define search-result-panel%(class vertical-panel%
+                                (super-new)
+                                (new button%[parent this][label "hello"][min-width 350])
+                                (new button%[parent this][label "this"][min-width 350])
+                                (new button%[parent this][label "is "][min-width 350])
+                                (new button%[parent this][label "for"][min-width 350])
+                                (new button%[parent this][label "the"][min-width 350])
+                                (new button%[parent this][label "result"][min-width 350])
 ))
 (define save-search%(class vertical-panel%
                         (super-new)
@@ -18,12 +27,12 @@
                                                 (new save-search%[parent this])
 ))
 (define start-destination-arrival-departure%(class horizontal-panel%
-                                              (super-new)
-                                              (define start(new text-field%[parent this][label #f][init-value "Start"]))
-                                              (define destination(new text-field%[parent this][label #f][init-value "Destination"]))
-                                              (new message%[parent this][horiz-margin 50][label ""])
-                                              (define arrival(new text-field%[parent this][label #f][init-value "Arrival"]))
-                                              (define departure(new text-field%[parent this][label #f][init-value "Departure"]))
+                                                (super-new)
+                                                (define start(new text-field%[parent this][label #f][init-value "Start"]))
+                                                (define destination(new text-field%[parent this][label #f][init-value "Destination"]))
+                                                (new message%[parent this][horiz-margin 50][label ""])
+                                                (define arrival(new text-field%[parent this][label #f][init-value "Arrival"]))
+                                                (define departure(new text-field%[parent this][label #f][init-value "Departure"]))
 ))
 (define firstscreen%(class vertical-panel%
                         (super-new)
@@ -35,13 +44,14 @@
                         (define lbox(new list-box%[label #f]
                                                 [parent (new horizontal-panel%[parent this])]
                                                 [choices (list)]
-                                                [style (list 'single 'column-headers 'vertical-label 'variable-columns)]
+                                                [style (list 'single 'column-headers 'vertical-label 'variable-columns )]
    	 	                                        [horiz-margin 50][min-height 100]
                                                 [columns (list "Time" "Route Time" "Stops to come")]))
                         (send/apply lbox set dummyData)
                         (new start-destination-arrival-departure% [parent this][horiz-margin 50][vert-margin 10])
                         (new transport-accesibility-searchandsave%[parent this][horiz-margin 50])
-                        (new message%[parent this][vert-margin 50][label ""])
+                        (new search-result-panel%[parent this][style (list 'border 'vscroll)][min-height 100][vert-margin 10][horiz-margin 50])
+                        (new message%[parent this][label ""])
 ))
 (new firstscreen%[parent mainpageframe][vert-margin 50])
 (send mainpageframe show #t)
