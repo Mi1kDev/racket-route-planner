@@ -34,5 +34,5 @@
     (call-with-input-file filename read-json)
 ))
 
-(write-json-wrapper c "save.json")
+(write-json-wrapper d "save.json")
 ;(read-json-wrapper "save.json")

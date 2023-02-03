@@ -1,6 +1,7 @@
 #lang racket/gui
 
 (require "route-find.rkt")
+(require json)
 
 (define fake-screen% (class vertical-panel%
     (super-new)
@@ -12,11 +13,23 @@
     (init-field (found-routes #f))
     (init-field (currentStart ""))
     (init-field (currentDest ""))
+    (init-field (filters (make-vector 3 #f)))
+    (init-field (accessiblity #f))
     (init-field (dummyData
         (list
             (list "12:20" "12:45" "13:30")
             (list "10 min" "23 min" "35 min")
             (list "Leicester Square - King's Cross - Holloway Road" "Waterloo - Leicester - Tottenham" "Bank - Elephant&Castle - Kennington")
+        )
+    ))
+    (define/private accessiblityToggle (lambda (x)
+        (cond
+            [(not (equal? x accessiblity)) (set! accessiblity x)]
+        )
+    ))
+    (define/private filterToggle (lambda (x pos)
+        (cond
+            [(not (equal? x (vector-ref filters pos)))(vector-set! filters pos x)]
         )
     ))
     (define/private findRoutes (lambda (s d)
@@ -37,6 +50,24 @@
             )
             (set! currentStart s) 
             (set! currentDest d)
+        )
+    ))
+    (define/private write-json-wrapper (lambda (jsexpr filename)
+        (call-with-output-file filename (lambda (x) (write-json jsexpr x)) #:exists 'replace)
+    ))
+    (define/public save (lambda()
+        (cond
+            [(not (equal? found-routes #f))
+                (let ((c (hash
+                'start currentStart
+                'end currentDest
+                'routes found-routes
+                'accessiblity accessiblity
+                'filters.  (hash 'bus (vector-ref filters 0) 'train (vector-ref filters 1) 'cab (vector-ref filters 2))
+                )))
+                    (write-json-wrapper c "save.json")
+                )
+            ]
         )
     ))
     (new button% [parent this] [label "Saved Routes"])
@@ -70,16 +101,19 @@
     (define sdbar (new start-destination-bar%[parent this][horiz-margin 50][vert-margin 10]))
     (define filters-buttons% (class horizontal-panel%
         (super-new)
-        (define bus(new check-box%[parent this][label "Bus"]))
-        (define train(new check-box%[parent this][label "Train"]))
-        (define cab(new check-box%[parent this][label "Cab"]))
+        (define bus(new check-box%[parent this][label "Bus"][callback (lambda(o e)(filterToggle (send bus get-value) 0))]))
+        (define train(new check-box%[parent this][label "Train"][callback (lambda(o e)(filterToggle (send train get-value) 1))]))
+        (define cab(new check-box%[parent this][label "Cab"][callback (lambda(o e)(filterToggle (send cab get-value) 2))]))
         (new message%[parent this][horiz-margin 10][label ""])
-        (define accessiblity(new check-box%[parent this][label "Wheelchair Accessible"]))
+        (define accessiblityBtn(new check-box%[parent this][label "Wheelchair Accessible"][callback (lambda (o e) (accessiblityToggle (send accessiblityBtn get-value)))]))
         (new message%[parent this][horiz-margin 10][label ""])
         (define save-search% (class vertical-panel%
             (super-new)
             (define searchButton (new button% [parent this][label "Search"][callback (lambda (o e) (search))]))
-            (define saveButton (new button%[parent this][label "Save"]))
+            (define saveButton (new button%[parent this][label "Save"][callback (lambda (o e) (createSave))]))
+            (define/private createSave (lambda ()
+                (send (send (send this get-parent) get-parent) save)
+            ))
             (define/private search (lambda ()
                 (send (send (send this get-parent) get-parent) getRoutes)
             ))
