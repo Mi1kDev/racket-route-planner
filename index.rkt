@@ -2,11 +2,8 @@
 
 (require "route-find.rkt")
 
-(define root (new frame%
-    [label "Route Planner"]
-    [width 400]
-    [height 600]
-    [stretchable-height #f][stretchable-width #f]
+(define fake-screen% (class vertical-panel%
+    (super-new)
 ))
 
 (define mainmenu% (class vertical-panel%
@@ -24,13 +21,22 @@
     ))
     (define/private findRoutes (lambda (s d)
         (cond
-            [(not (and (equal? currentStart s) (equal? currentDest d))) (set! currentStart s) (set! currentDest d) (println "RUN") (set! found-routes (send route run s d))]
+            [(not (and (equal? currentStart s) (equal? currentDest d))) (set! found-routes (send route run s d))]
         )
     ))
+    (define/private displayMessage (lambda (stringName)
+        (send error-bar set-label stringName)
+    ))
     (define/public getRoutes (lambda()
-        (findRoutes (send sdbar getValue "s") (send sdbar getValue "des"))
-        (cond
-            [(not (equal? #f found-routes)) (send sr addChildren found-routes)]
+        (let ((d (send sdbar getValue "des")) (s (send sdbar getValue "s")))
+            (findRoutes s d)
+            (cond
+                [(and (equal? s currentStart) (equal? d currentDest))]
+                [(and (not (equal? #f found-routes))) (send sr addChildren found-routes) (displayMessage "")]
+                [#t (displayMessage "Something went wrong!")]
+            )
+            (set! currentStart s) 
+            (set! currentDest d)
         )
     ))
     (new button% [parent this] [label "Saved Routes"])
@@ -96,6 +102,31 @@
         ))
     ))
     (define sr (new search-results% [parent this][style (list 'border 'vscroll)][min-height 100][vert-margin 10][horiz-margin 50]))
+    (define error-bar (new message% [parent this][label ""][auto-resize #t]))
+    (new button% [label "Switch"][parent this][callback (lambda (o e)(send (send this get-parent) switchScreens fake-screen%))])
+))
+
+(define parent% (class frame%
+    (super-new)
+    (init-field (screen mainmenu%))
+    (define/private clearScreen (lambda ()
+        (for ([child (send this get-children)])
+            (send this delete-child child)
+        )
+    ))
+    (define/public switchScreens (lambda (newScreen)
+        (cond
+            [(equal? screen newScreen)]
+            [#t (clearScreen) (set! screen newScreen) (new newScreen [parent this])]
+        )
+    ))
+))
+
+(define root (new parent%
+    [label "Route Planner"]
+    [width 400]
+    [height 600]
+    [stretchable-height #f][stretchable-width #f]
 ))
 
 (define y (new mainmenu% [parent root][vert-margin 50]))
