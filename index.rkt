@@ -63,7 +63,7 @@
                 'end currentDest
                 'routes found-routes
                 'accessiblity accessiblity
-                'filters.  (hash 'bus (vector-ref filters 0) 'train (vector-ref filters 1) 'cab (vector-ref filters 2))
+                'filters  (hash 'bus (vector-ref filters 0) 'train (vector-ref filters 1) 'cab (vector-ref filters 2))
                 )))
                     (write-json-wrapper c "save.json")
                 )
