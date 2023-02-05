@@ -81,6 +81,7 @@
         [columns (list "Time" "Route Time" "Stops To Come")]
     ))
     (send/apply timetable set dummyData)
+    (new button%[label "CHANGE DATA"][callback (lambda (o e)(send/apply timetable set (list (list "Apple"))))])
     (define start-destination-bar% (class horizontal-panel%
         (super-new)
         (define start (new text-field%[parent this][label ""][init-value ""]))
