@@ -2,16 +2,16 @@
 
 (define network-names '("euston" "tottenham court road" "leicester square" "green park" "waterloo" "kennington" "elephant and castle" "bank" "king's cross st. pancras" "hollow way road"))
 (define network-structure '(
-    (1 8)
-    (0 2)
-    (1 8 3 4)
-    (2)
-    (2 5)
-    (4 6)
-    (5 7)
-    (6 8)
-    (9 0 2 7)
-    (8)
+    #|0: Euston|#(1 8)
+    #|1: Tottenham|#(0 2)
+    #|2: Leicester Square|#(1 3 4 8)
+    #|3: Green Park|#(2)
+    #|4: Waterloo|#(2 5)
+    #|5: Kennington|#(4 6)
+    #|6: Elephant and Castle|#(5 7)
+    #|7: Bank|#(6 8)
+    #|8: King's Cross St. Pancras|#(0 2 7 9)
+    #|9: Holloway Road|#(8)
 ))
 
 (define route-finder% (class object%
@@ -28,7 +28,6 @@
     ))
 
     (define/private getAllPaths (lambda (s d visited path)
-        (set! returnPath '())
         (set! visited (list-set visited s #t))
         (set! path (append path (list s)))
         (cond
@@ -59,7 +58,7 @@
                     (set! newPath (cons stringPath newPath))
                     (set! stringPath "")
                     
-                )newPath]
+                )(set! returnPath '())newPath]
             )
         )
     ))
@@ -78,6 +77,6 @@
 ))
 
 ;(define runner (new route-finder%))
-;(send runner run "King's Cross St. Pancras" "Kennington")
+;(send runner run "Euston" "Tottenham Court Road")
 
 (provide route-finder%)
