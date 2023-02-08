@@ -206,7 +206,7 @@
     ))
     (new hzp% [parent this])
     (cond
-        [(equal? save #t) (new button%[parent this][label "Save"][min-width 300][callback (lambda (o e)(send (send this get-parent) saveRoutes start destination route timeTaken "save.json"))])]
+        [(equal? save #t) (new button%[parent this][label "Save"][min-width 300][callback (lambda (o e)(send (send this get-parent) saveRoute start destination route timeTaken "save.json"))])]
     )
     (define hzpanel(new horizontal-panel%[parent this]))
     (new button%[parent hzpanel][label "Back"][horiz-margin 50][callback (lambda (o e)(send (send this get-parent) popScreen))])
@@ -232,11 +232,24 @@
             'save #f
         ))
     ))
+    (define/private isInData? (lambda (search data)
+        (ormap (lambda (d) (equal? search d)) data)
+    ))
+    (define/private deleteSavedRoute (lambda (data pArg)
+        (cond
+            [(isInData? data routeInfo) 
+                (set! routeInfo(remove data routeInfo)) (clear pArg) (buildRoutes pArg)
+                (send (send this get-parent) saveRoutes routeInfo "save.json")
+            ]
+        )
+    ))
     (define/private buildRoutes (lambda (parentArg)
         (cond
             [(empty? routeInfo)]
             [#t (for ([i routeInfo])
-                (new button%[parent parentArg][label (string-append (hash-ref i 'start) "->" (hash-ref i 'dest) " " (number->string(/ (round ( * 100 (hash-ref i 'time))) 100)))][callback (lambda (o e) (createRoutePage (hash-ref i 'start) (hash-ref i 'dest) (hash-ref i 'route) (hash-ref i 'time)))])
+                (define n (new horizontal-panel%[parent parentArg][alignment (list 'center 'center)]))
+                (new button%[parent n][label (string-append (hash-ref i 'start) "->" (hash-ref i 'dest) " " (number->string(/ (round ( * 100 (hash-ref i 'time))) 100)))][callback (lambda (o e) (createRoutePage (hash-ref i 'start) (hash-ref i 'dest) (hash-ref i 'route) (hash-ref i 'time)))])
+                (new button%[parent n][label "Delete"][callback (lambda (o e)(deleteSavedRoute i parentArg))])
             )]
         )
     ))
@@ -263,8 +276,8 @@
     (cond
         [(empty? routeInfo)]
         [#t 
-            (define vp (new vertical-panel% [parent this]))
-            (buildButtons (new horizontal-panel%[parent this]) vp)
+            (define vp (new vertical-panel% [parent this][style (list 'border 'vscroll)][horiz-margin 50]))
+            (buildButtons (new horizontal-panel%[parent this][horiz-margin 50]) vp)
             (buildRoutes vp)
         ]
     )
@@ -292,7 +305,13 @@
             [#t '()]
         )
     ))
-    (define/public saveRoutes (lambda(s d savedRoute approxTime filename)
+    (define/public saveRoutes (lambda (routeInformation filename)
+        (cond
+            [(file-exists? filename) (write-json-wrapper routeInformation filename)]
+        )
+    ))
+
+    (define/public saveRoute (lambda(s d savedRoute approxTime filename)
         (cond
             [(file-exists? filename)
                 (let ((data (read-json-wrapper filename)))
