@@ -13,12 +13,26 @@
     #|8: King's Cross St. Pancras|#(0 2 7 9)
     #|9: Holloway Road|#(8)
 ))
+(define network-distances '(
+    (2.4 3.0)
+    (2.4 2.0)
+    (2.0 1.5 2.5 4)
+    (1.5)
+    (2.5 1.5)
+    (1.5 2.0)
+    (1.5 2.35)
+    (2.35 1.6)
+    (3.0 4 1.6 1.0)
+    (1.0)
+))
 
 (define route-finder% (class object%
     (super-new)
     (init-field (v 10))
     (init-field (names network-names))
     (init-field (graph network-structure))
+    (init-field (distances network-distances))
+    (init-field (totalDistance 0))
     (init-field (stringPath ""))
     (init-field (convertedPath '()))
     (init-field (returnPath '()))
@@ -45,7 +59,7 @@
     ))
 
     (define/public printReturnPaths (lambda ()
-        (let ((newPath '()))
+        (let ((newPath '()) (prevPath '()) (finalPath '()))
             (cond
                 [(empty? returnPath) "There is no path between these stations."]
                 [#t (for ([i (in-range (length returnPath))])
@@ -54,11 +68,19 @@
                             [(not (equal? (list-ref (list-ref returnPath i) j) (last (list-ref returnPath i)))) (set! stringPath (string-append stringPath (list-ref names (list-ref (list-ref returnPath i) j)) " > "))]
                             [else (set! stringPath (string-append stringPath (list-ref names (list-ref (list-ref returnPath i) j))))]
                         )
+                        ;(println (index-of (list-ref graph (list-ref (list-ref returnPath i) j))(list-ref (list-ref returnPath i) (+ 1 j))))
+                        (cond
+                            [(< j (- (length (list-ref returnPath i)) 1)) (set! totalDistance  (+ totalDistance (list-ref (list-ref distances (list-ref (list-ref returnPath i) j)) (index-of (list-ref graph (list-ref (list-ref returnPath i) j))(list-ref (list-ref returnPath i) (+ 1 j))))))]
+                        )
                     )
-                    (set! newPath (cons stringPath newPath))
+                    (set! newPath (list(list stringPath totalDistance)))
+                    (set! finalPath (append finalPath newPath))
+                    ;(set! newPath (cons newPath totalDistance))
+                    
+                    (set! totalDistance 0)
                     (set! stringPath "")
                     
-                )(set! returnPath '())newPath]
+                )(set! returnPath '()) finalPath]
             )
         )
     ))
