@@ -1,12 +1,18 @@
 #lang racket/gui
+#|After main-page comment, please read the comments from the bottom. Any empty messages are a contribution to
+maintain the aesthetics of the page|#
+#|Main page frame is created as a new class specifying the width and height and making sure is strechable|#
 (define mainpageframe(new frame%
                         [label "Route Planner"][width 400][height 600][stretchable-height #t][stretchable-width #t]
 ))
+#|A new class is created as a vertical-panel subclass, in here we place the save and search buttons|#
 (define save-search%(class vertical-panel%
                         (super-new)
                         (define searchbutton(new button%[parent this][label "Search"]))
                         (define savebutton(new button%[parent this][label "Save"]))
 ))
+#|Another class created as an horizontal-panel subclass, including the bus, train, taxi and acesibility check box,
+the subclass save-search was called to be present inside the horizontal panel|#
 (define transport-accesibility-searchandsave%(class horizontal-panel%
                                                 (super-new)
                                                 (define bus(new check-box%[parent this][label "Bus"]))
@@ -17,6 +23,7 @@
                                                 (new message%[parent this][horiz-margin 10][label ""])
                                                 (new save-search%[parent this])
 ))
+#|This class as an horizontal-panel subclass, will include the start, destination, arrival and departure text-fields|#
 (define start-destination-arrival-departure%(class horizontal-panel%
                                               (super-new)
                                               (define start(new text-field%[parent this][label #f][init-value "Start"]))
@@ -25,6 +32,11 @@
                                               (define arrival(new text-field%[parent this][label #f][init-value "Arrival"]))
                                               (define departure(new text-field%[parent this][label #f][init-value "Departure"]))
 ))
+#|The main screen is define as a vertical-panel subclass to maintain all the other subclasses in the page organised
+with an horizontal margin of 50 in all the elements, a new button to check the saved routes is created followed by 
+creating a list with data that will be afterwards included inside a list-box that will have a set up margin
+with different styles incorporated to represent the columns and the data in the columns in the way desired.
+Followed by this, the other subclasses are called|#
 (define firstscreen%(class vertical-panel%
                         (super-new)
                         (init-field (dummyData 
