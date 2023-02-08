@@ -1,4 +1,7 @@
 #lang racket/gui
+#|This is the second part of the main page, everything is the same as the first part except for the incorporation of 
+the search-result-panel as a subclass of a vertical panel, that will include all the possible routes as buttons
+to be able to be selected. This subclass is called in the first-screen% defining the style, minimum height and margins.|#
 (define mainpageframe(new frame%
                         [label "Route Planner"][width 400][height 600][stretchable-height #t][stretchable-width #t]
 ))
