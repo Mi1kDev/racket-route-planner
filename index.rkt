@@ -238,15 +238,15 @@
     (define/private deleteSavedRoute (lambda (data pArg)
         (cond
             [(isInData? data routeInfo) 
-                (set! routeInfo(remove data routeInfo)) (clear pArg) (buildRoutes pArg)
+                (set! routeInfo(remove data routeInfo)) (clear pArg) (buildRoutes pArg routeInfo)
                 (send (send this get-parent) saveRoutes routeInfo "save.json")
             ]
         )
     ))
-    (define/private buildRoutes (lambda (parentArg)
+    (define/private buildRoutes (lambda (parentArg routes)
         (cond
             [(empty? routeInfo)]
-            [#t (for ([i routeInfo])
+            [#t (for ([i routes])
                 (define n (new horizontal-panel%[parent parentArg][alignment (list 'center 'center)]))
                 (new button%[parent n][label (string-append (hash-ref i 'start) "->" (hash-ref i 'dest) " " (number->string(/ (round ( * 100 (hash-ref i 'time))) 100)))][callback (lambda (o e) (createRoutePage (hash-ref i 'start) (hash-ref i 'dest) (hash-ref i 'route) (hash-ref i 'time)))])
                 (new button%[parent n][label "Delete"][callback (lambda (o e)(deleteSavedRoute i parentArg))])
@@ -263,7 +263,7 @@
             [(<= (length routeInfo) 1)]
             [#t (clear parentArg)
                 (set! routeInfo (sort routeInfo proc #:key (lambda (x)(hash-ref x 'time))))
-                (buildRoutes parentArg)
+                (buildRoutes parentArg routeInfo)
             ]
         )
     ))
@@ -271,14 +271,21 @@
         (new button%[parent hzPanel][label "Sort Asc."][callback (lambda (o e)(sortRoutes pArg <))])
         (new button%[parent hzPanel][label "Sort Dsc."][callback (lambda (o e)(sortRoutes pArg >))])
     ))
+    (define/private search (lambda (textValue resultPanel)
+        (let ((filteredResults (filter (lambda (x) (or (string-contains? (hash-ref x 'dest) (string-downcase textValue))(string-contains? (hash-ref x 'start) (string-downcase textValue)))) routeInfo)))
+            (clear resultPanel)
+            (buildRoutes resultPanel filteredResults)
+        )
+    ))
     
     (loadData)
     (cond
         [(empty? routeInfo)]
         [#t 
+            (define searchBar (new text-field% [parent this][label "Search"][horiz-margin 50][callback (lambda (o e) (search (send searchBar get-value) vp))]))
             (define vp (new vertical-panel% [parent this][style (list 'border 'vscroll)][horiz-margin 50]))
             (buildButtons (new horizontal-panel%[parent this][horiz-margin 50]) vp)
-            (buildRoutes vp)
+            (buildRoutes vp routeInfo)
         ]
     )
     (new button%[parent this][label "Back"][callback (lambda (o e)(send (send this get-parent) popScreen))])
