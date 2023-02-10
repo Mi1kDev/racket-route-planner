@@ -1,3 +1,5 @@
+#|Group members:    M00829986 MORGAN, Teon   -   M00774667 RINCON RODRIGUES, Alam
+Route Planner App with GUI - Transport for London(TfL)|#
 #lang racket/gui
 ;We import some of the required modules for the functionality of the app
 ;That being the route-find module which has a reference to the route-finder class
@@ -12,14 +14,16 @@ with different styles incorporated to represent the columns and the data in the 
 Followed by this, the other subclasses are called|#
 (define mainmenu% (class vertical-panel%
     (super-new)
-    ;Certain variables that may need to be referenced by various functions are initialized as fields. This includes an instance of the route-finder class
+    ;Certain variables that may need to be referenced by various functions are initialized as fields. This includes 
+    ;an instance of the route-finder class
     (init-field (route (new route-finder%)))
     ;a variable to store all the returned routes from the route-finder
     (init-field (found-routes #f))
     ;variables to store both the start and destination points as determined by the user
     (init-field (currentStart ""))
     (init-field (currentDest ""))
-    ;a vector to store the states of some of the toggles used in the program. Initializing them as false to represent the state of the user interface.
+    ;a vector to store the states of some of the toggles used in the program. Initializing them as false to represent 
+    ;the state of the user interface.
     (init-field (filters (make-vector 3 #f)))
     ;a variable to reflect the state of the accessibility toggle in the UI
     (init-field (accessiblity #f))
@@ -28,7 +32,8 @@ Followed by this, the other subclasses are called|#
     ;a variable to hold the actual time the user wants to either arrive at or depart by
     (init-field (timeToPass ""))
     ;Train and Bus Data are both used to display information regarding the respective mode of transport
-    ;In a full implementation this information should be based off of the user's geographical location but as of now it simply displays placeholder information.
+    ;In a full implementation this information should be based off of the user's geographical location but as of now it 
+    ;simply displays placeholder information.
     (init-field (trainData
         (list
             (list "12:20" "12:45" "13:30")
@@ -43,7 +48,8 @@ Followed by this, the other subclasses are called|#
             (list "192" "196" "183")
         )
     ))
-    ;the private accessibilityToggle and filterToggle are called by their respective UI checkboxes to reflect the state of the checkbox within the actual variables
+    ;the private accessibilityToggle and filterToggle are called by their respective UI checkboxes to reflect the state of 
+    ;the checkbox within the actual variables
     (define/private accessiblityToggle (lambda (x)
         (cond
             [(not (equal? x accessiblity)) (set! accessiblity x)]
@@ -54,10 +60,12 @@ Followed by this, the other subclasses are called|#
             [(not (equal? x (vector-ref filters pos)))(vector-set! filters pos x)]
         )
     ))
-    ;A helper function which calls on the route-finder class to get all the routes between a start and end point and return it to the found-routes variable
+    ;A helper function which calls on the route-finder class to get all the routes between a start and end point and return 
+    ;it to the found-routes variable
     (define/private findRoutes (lambda (s d)
         (cond
-            ;The function would only need to be run if the currentStart and currentDestination are not the same as the passed in s and d variables. This simply prevents unnecessary calls of the function
+            ;The function would only need to be run if the currentStart and currentDestination are not the same as the passed 
+            ;in s and d variables. This simply prevents unnecessary calls of the function
             [(not (and (equal? currentStart s) (equal? currentDest d))) (set! found-routes (send route run s d))]
         )
     ))
@@ -74,8 +82,10 @@ Followed by this, the other subclasses are called|#
                 [(equal? (string-downcase s) (string-downcase d))]
                 ;calls the helper findRoutes function
                 [#t (findRoutes s d)
-                    ;We perform any necessary error handling. If the found routes are of valid form then we update the user interface to display the results.
-                    ;If there is an issue with the form of the found routes it would mean something went wrong during execution and we display this information to the user.
+                    ;We perform any necessary error handling. If the found routes are of valid form then we update the user interface 
+                    ;to display the results.
+                    ;If there is an issue with the form of the found routes it would mean something went wrong during execution and we display 
+                    ;this information to the user.
                     (cond
                         [(and (equal? s currentStart) (equal? d currentDest))]
                         [(and (not (equal? #f found-routes))) (send sr addChildren found-routes) (displayMessage "")]
@@ -87,7 +97,8 @@ Followed by this, the other subclasses are called|#
             )
         )
     ))
-    ;This function finds whether the user has entered into the departBy input field or ArriveAt input field. Only one can be active at a time so if the user switches then the other field is cleared of all data
+    ;This function finds whether the user has entered into the departBy input field or ArriveAt input field. Only one can 
+    ;be active at a time so if the user switches then the other field is cleared of all data
     (define/private arriveDepartureHandle (lambda (type otherField)
         (cond
             [(equal? type "a") (set! arrive? #t)
@@ -149,7 +160,8 @@ Followed by this, the other subclasses are called|#
     the subclass save-search was called to be present inside the horizontal panel|#
     (define filters-buttons% (class horizontal-panel%
         (super-new)
-        ;The various checkboxes (bus, train, cab, accessibility) have callbacks to update their respective fields with their changed value. This makes using these values for calculations easier
+        ;The various checkboxes (bus, train, cab, accessibility) have callbacks to update their respective fields with their 
+        ;changed value. This makes using these values for calculations easier
         (define bus(new check-box%[parent this][label "Bus"][callback (lambda(o e)(filterToggle (send bus get-value) 0))]))
         (define train(new check-box%[parent this][label "Train"][callback (lambda(o e)(filterToggle (send train get-value) 1))]))
         (define cab(new check-box%[parent this][label "Cab"][callback (lambda(o e)(filterToggle (send cab get-value) 2))]))
@@ -159,7 +171,8 @@ Followed by this, the other subclasses are called|#
         ;The save-search is a sub-class of a vertical-panel and was originally supposed to hold two buttons, but the save button has since moved
         (define save-search% (class vertical-panel%
             (super-new)
-            ;we create a search button which when called will call the getRoutes function defined above. As the button and said function are not in the same scope, we have to get the parents of these classes until we can call the function
+            ;we create a search button which when called will call the getRoutes function defined above. As the button and 
+            ;said function are not in the same scope, we have to get the parents of these classes until we can call the function
             (define searchButton (new button% [parent this][label "Search"][callback (lambda (o e) (search))]))
             (define/private search (lambda ()
                 (send (send (send this get-parent) get-parent) getRoutes)
@@ -274,11 +287,13 @@ in the way desired.|#
     (new hzp% [parent this])
     ;If when building this screen, a save tag is passed in then we should display a save button
     (cond
-        ;The save button calls a function of the frame that being saveRoute and provides it with the necessary data for this particular route to be saved in a json file
+        ;The save button calls a function of the frame that being saveRoute and provides it with the necessary data for 
+        ;this particular route to be saved in a json file
         [(equal? save #t) (new button%[parent this][label "Save"][min-width 300][callback (lambda (o e)(send (send this get-parent) saveRoute start destination route timeTaken "save.json"))])]
     )
     (define hzpanel(new horizontal-panel%[parent this]))
-    ;we create a back button which calls a function of the frame which keeps track of what screen the user is currently viewing and returns them to the appropriate previous screen
+    ;we create a back button which calls a function of the frame which keeps track of what screen the user is currently viewing 
+    ;and returns them to the appropriate previous screen
     (new button%[parent hzpanel][label "Back"][horiz-margin 50][callback (lambda (o e)(send (send this get-parent) popScreen))])
 )) 
 
@@ -286,7 +301,8 @@ in the way desired.|#
 (define savedRoutesPage% (class vertical-panel%
     (init-field (routeInfo '()))
     (super-new)
-    ;This function calls on the frame to load data from a json file. If any data is returned then we set routeInfo field to be this data. If not we simply display a message that there are no saved routes.
+    ;This function calls on the frame to load data from a json file. If any data is returned then we set routeInfo field to 
+    ;be this data. If not we simply display a message that there are no saved routes.
     (define/private loadData (lambda ()
         (let ((data (send (send this get-parent) loadRoutes "save.json")))
             (cond
@@ -295,7 +311,8 @@ in the way desired.|#
             )
         ) 
     ))
-    ;This function allows us to switch screens to a route information screen, this version of the route information screen should not allow us to save however as the route is already saved.
+    ;This function allows us to switch screens to a route information screen, this version of the route information screen 
+    ;should not allow us to save however as the route is already saved.
     ;As such we pass false into the save tag
     (define/private createRoutePage (lambda (start dest route timeTaken)
         (send (send this get-parent) switchScreens routeInfoScreen% (hash
@@ -313,14 +330,16 @@ in the way desired.|#
     ;removes a given route from route info and rewrites the json file to exclude the route, effectively deleting it.
     (define/private deleteSavedRoute (lambda (data pArg)
         (cond
-            ;if the data we want to delete is a saved route then we remove it from route info and rebuild the page without it then update the json file to reflect the change
+            ;if the data we want to delete is a saved route then we remove it from route info and rebuild the page without 
+            ;it then update the json file to reflect the change
             [(isInData? data routeInfo) 
                 (set! routeInfo(remove data routeInfo)) (clear pArg) (buildRoutes pArg routeInfo)
                 (send (send this get-parent) saveRoutes routeInfo "save.json")
             ]
         )
     ))
-    ;takes a parent widget (a vertical panel) and a list of routes, loops through the list of routes and creates both a button to view the route information page and a button to delete the route
+    ;takes a parent widget (a vertical panel) and a list of routes, loops through the list of routes and creates both a button 
+    ;to view the route information page and a button to delete the route
     (define/private buildRoutes (lambda (parentArg routes)
         (cond
             [(empty? routeInfo)]
@@ -364,7 +383,8 @@ in the way desired.|#
     (loadData)
     (cond
         [(empty? routeInfo)]
-        ;if we have saved routes then we create a search bar, a panel to display the saved routes as well as the buttons to sort them. Then we display all the saved routes inside our panel
+        ;if we have saved routes then we create a search bar, a panel to display the saved routes as well as the buttons to 
+        ;sort them. Then we display all the saved routes inside our panel
         [#t 
             (define searchBar (new text-field% [parent this][label "Search"][horiz-margin 50][callback (lambda (o e) (search (send searchBar get-value) vp))]))
             (define vp (new vertical-panel% [parent this][style (list 'border 'vscroll)][horiz-margin 50]))
@@ -376,7 +396,8 @@ in the way desired.|#
     (new button%[parent this][label "Back"][callback (lambda (o e)(send (send this get-parent) popScreen))])
 ))
 
-;the parent class is a sub-class of the frame class. With extra functions and variables for saving and loading data as well as managing the various screens.
+;the parent class is a sub-class of the frame class. With extra functions and variables for saving and loading data as well 
+;as managing the various screens.
 (define parent% (class frame%
     (super-new)
     ;we store both the current screen and the previous screen to determine which screen to go to when going back from another screen
@@ -412,7 +433,8 @@ in the way desired.|#
     ;saves a singular route at a time
     (define/public saveRoute (lambda(s d savedRoute approxTime filename)
         (cond
-            ;if the file exists already then reads the contents of the file and appends the new route to be saved to those contents before rewriting the file. Effectively merging the previous data with the new
+            ;if the file exists already then reads the contents of the file and appends the new route to be saved to those 
+            ;contents before rewriting the file. Effectively merging the previous data with the new
             [(file-exists? filename)
                 (let ((data (read-json-wrapper filename)))
                     (set! data (append data 
@@ -427,7 +449,8 @@ in the way desired.|#
                     ))
                     (write-json-wrapper data filename)
                 )
-            ];if the file does not exist then we are creating the file for the first time and do not need to ready any data from the file. We simply write our data to the file.
+            ];if the file does not exist then we are creating the file for the first time and do not need to ready any data 
+            ;from the file. We simply write our data to the file.
             [else (let ((data (list 
                 (hash
                     'start s
@@ -455,7 +478,9 @@ in the way desired.|#
         (cond
             ;if the screen we are to switch to is the same as the currentScreen then we do not need to switchScreens
             [(equal? screen newScreen)]
-            ;if the new screen is a route information screen then we clear the screen. Set our previous screen to be out current screen and set our current screen to be the new screen. We then instantiate the route information screen with the arguments passed into the function.
+            ;if the new screen is a route information screen then we clear the screen. Set our previous screen to be out 
+            ;current screen and set our current screen to be the new screen. We then instantiate the route information screen 
+            ;with the arguments passed into the function.
             [(equal? newScreen routeInfoScreen%) (clearScreen) 
                 (set! prevScreen screen)
                 (set! screen newScreen) 
@@ -467,7 +492,8 @@ in the way desired.|#
                     [timeTaken (hash-ref args 'time)]
                     [save (hash-ref args 'save)]
                     )]
-            ;if the screen does not need special arguments to build then we set the previous screen to our current screen and our current screen to the new screen and then instantiate whatever this new screen is
+            ;if the screen does not need special arguments to build then we set the previous screen to our current screen and 
+            ;our current screen to the new screen and then instantiate whatever this new screen is
             [#t (clearScreen)(set! prevScreen screen)(set! screen newScreen) (new newScreen [parent this])]
         )
     ))
