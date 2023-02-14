@@ -38,27 +38,23 @@ Followed by this, the other subclasses are called|#
         (list
             (list "12:20" "12:45" "13:30")
             (list "10 min" "23 min" "35 min")
-            (list "Leicester Square - King's Cross - Holloway Road" "Waterloo - Leicester - Tottenham" "Bank - Elephant&Castle - Kennington")
-        )
+            (list "Leicester Square - King's Cross - Holloway Road" "Waterloo - Leicester - Tottenham" "Bank - Elephant&Castle - Kennington"))
     ))
     (init-field (busData
         (list
             (list "12:30" "12:35" "1:00")
             (list "10 min" "15 min" "40 min")
-            (list "192" "196" "183")
-        )
+            (list "192" "196" "183"))
     ))
     ;the private accessibilityToggle and filterToggle are called by their respective UI checkboxes to reflect the state of 
     ;the checkbox within the actual variables
     (define/private accessiblityToggle (lambda (x)
         (cond
-            [(not (equal? x accessiblity)) (set! accessiblity x)]
-        )
+            [(not (equal? x accessiblity)) (set! accessiblity x)])
     ))
     (define/private filterToggle (lambda (x pos)
         (cond
-            [(not (equal? x (vector-ref filters pos)))(vector-set! filters pos x)]
-        )
+            [(not (equal? x (vector-ref filters pos)))(vector-set! filters pos x)])
     ))
     ;A helper function which calls on the route-finder class to get all the routes between a start and end point and return 
     ;it to the found-routes variable
@@ -66,8 +62,7 @@ Followed by this, the other subclasses are called|#
         (cond
             ;The function would only need to be run if the currentStart and currentDestination are not the same as the passed 
             ;in s and d variables. This simply prevents unnecessary calls of the function
-            [(not (and (equal? currentStart s) (equal? currentDest d))) (set! found-routes (send route run s d))]
-        )
+            [(not (and (equal? currentStart s) (equal? currentDest d))) (set! found-routes (send route run s d))])
     ))
     ;If for some reason an error occurs, then this function used to notify the user that something went wrong.
     (define/private displayMessage (lambda (errString)
@@ -89,13 +84,10 @@ Followed by this, the other subclasses are called|#
                     (cond
                         [(and (equal? s currentStart) (equal? d currentDest))]
                         [(and (not (equal? #f found-routes))) (send sr addChildren found-routes) (displayMessage "")]
-                        [#t (displayMessage "Something went wrong!")]
-                    )
+                        [#t (displayMessage "Something went wrong!")])
                     ;Update the currentStart and currentDest values to reflect the new currentStart and new currentDest
                     (set! currentStart s) 
-                    (set! currentDest d)]
-            )
-        )
+                    (set! currentDest d)]))
     ))
     ;This function finds whether the user has entered into the departBy input field or ArriveAt input field. Only one can 
     ;be active at a time so if the user switches then the other field is cleared of all data
@@ -103,22 +95,16 @@ Followed by this, the other subclasses are called|#
         (cond
             [(equal? type "a") (set! arrive? #t)
                 (cond
-                    [(not (equal? (send otherField get-value) "")) (send otherField set-value "")]
-                )
-            ]
+                    [(not (equal? (send otherField get-value) "")) (send otherField set-value "")])]
             [(equal? type "d") (set! arrive? #f)
                 (cond
-                    [(not (equal? (send otherField get-value) "")) (send otherField set-value "")]
-                )
-            ]
-        )
+                    [(not (equal? (send otherField get-value) "")) (send otherField set-value "")])])
     ))
     ;Changes the information displayed on the user interface from one preset to the other
     (define/private switchDisplayedData (lambda (currentData)
         (cond
             [(equal? currentData "See Bus Times")(send/apply timetable set busData)(send data-button set-label "See Train Times")]
-            [(equal? currentData "See Train Times")(send/apply timetable set trainData)(send data-button set-label "See Bus Times")]
-        )
+            [(equal? currentData "See Train Times")(send/apply timetable set trainData)(send data-button set-label "See Bus Times")])
     ))
     ;This button allows us to view our saved routes by switching to the savedRoutes Screen
     (new button% [parent this] [label "Saved Routes"][callback (lambda (o e) (send (send this get-parent) switchScreens savedRoutesPage% '()))])
@@ -150,9 +136,7 @@ Followed by this, the other subclasses are called|#
                 [(equal? x "s") (send start get-value)]
                 [(equal? x "a") (send arrival get-value)]
                 [(equal? x "des") (send destination get-value)]
-                [(equal? x "dep") (send departure get-value)]
-            )
-        ))
+                [(equal? x "dep") (send departure get-value)])))
     ))
     ;create an instantiation of the defined sub-class
     (define sdbar (new start-destination-bar%[parent this][horiz-margin 50][vert-margin 10]))
@@ -175,9 +159,7 @@ Followed by this, the other subclasses are called|#
             ;said function are not in the same scope, we have to get the parents of these classes until we can call the function
             (define searchButton (new button% [parent this][label "Search"][callback (lambda (o e) (search))]))
             (define/private search (lambda ()
-                (send (send (send this get-parent) get-parent) getRoutes)
-            ))
-        ))
+                (send (send (send this get-parent) get-parent) getRoutes)))))
         (new save-search% [parent this])
     ))
     ;we create an instance of the filters-button class
@@ -196,12 +178,10 @@ Followed by this, the other subclasses are called|#
         (super-new)
         ;helper function to convert the appeneded totall distance of a route to a time. Simply divides by the average speed of a train to return a time. 
         (define/private convertDistanceToTime (lambda (distance)
-            (/ 20.5 distance)
-        ))
+            (/ 20.5 distance)))
         ;helper function to convert route strings into a list of strings
         (define/private convertRouteStringToRoute (lambda (routeStr)
-            (string-split routeStr " > ")
-        ))
+            (string-split routeStr " > ")))
         ;function to set the variables of the routeInformation page that the user will be taken to.
         ;sends the frame a call for the switchScreens function, passing in the parameters necessary to make each routeInformation screen unique
         (define/private buildPage (lambda(routeStr distance)
@@ -210,8 +190,7 @@ Followed by this, the other subclasses are called|#
                             'dest currentDest
                             'route (convertRouteStringToRoute routeStr) 
                             'time (convertDistanceToTime distance)
-                            'save #t))
-        ))
+                            'save #t))))
         (define/public addChildren (lambda (results)
             ;clears all children of the panel
             (clearAll)
@@ -221,12 +200,11 @@ Followed by this, the other subclasses are called|#
                     ;conditions are used for some formatting. If the length of a route string is above a certain threshold then we make limit it to a certain length
                     ;each button will follow the format "A>B>C Approx. {time}"
                     ;every button has a callback which allows them to switch to a new routeInformation screen
-                    [(> (string-length (first i)) 40) (new button% [label (string-append (string-titlecase (substring (first i) 0 39)) "... "(number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] [parent this][callback (lambda (o e)(buildPage (first i) (second i)))])]
-                    [#t (new button% [label (string-append (string-titlecase (first i)) (number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] [parent this][callback (lambda (o e)(buildPage (first i) (second i)))])
-                    ]
-                )
-            )
-        )) 
+                    [(> (string-length (first i)) 40) (new button% [label (string-append (string-titlecase (substring (first i) 0 39)) "... "
+                                                                                        (number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] 
+                                                                    [parent this][callback (lambda (o e)(buildPage (first i) (second i)))])]
+                    [#t (new button% [label (string-append (string-titlecase (first i)) (number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] 
+                                    [parent this][callback (lambda (o e)(buildPage (first i) (second i)))])])))) 
         ;sorts the found routes based off of their total distance and whatever procedure is passed ub
         (define/public sortResults (lambda (proc)
             (cond
@@ -234,16 +212,11 @@ Followed by this, the other subclasses are called|#
                 [(<= (length found-routes) 1)]
                 [#t (clearAll)
                     (set! found-routes (sort found-routes proc #:key (lambda (x) (second x))))
-                    (addChildren found-routes)
-                ]
-            )
-        ))
+                    (addChildren found-routes)])))
         ;simply clears all children in the class
         (define/private clearAll (lambda ()
             (for ([child (send this get-children)])
-                (send this delete-child child)
-            )
-        ))
+                (send this delete-child child))))
     ))
     ;we create an instance of the search results class
     (define sr (new search-results% [parent this][style (list 'border 'vscroll)][min-height 100][vert-margin 10][horiz-margin 50]))
@@ -262,7 +235,6 @@ in the way desired.|#
     (init-field (save #f))
     (init-field (timeTaken 0))
     (init-field (timePassedIn ""))
-
     ;a horizontal class to display the start and destination and arrange them
     (define hz% (class horizontal-panel%
         (super-new)
@@ -274,8 +246,7 @@ in the way desired.|#
     (define routeInformation% (class vertical-panel%
         (super-new)
         (for ([i route])
-            (new message%[parent this][label (string-titlecase i)][auto-resize #t][min-width 350])
-        )
+            (new message%[parent this][label (string-titlecase i)][auto-resize #t][min-width 350]))
     ))
     (new routeInformation%[parent this][style (list 'border 'vscroll)][min-height 30][horiz-margin 50])
 
@@ -289,8 +260,8 @@ in the way desired.|#
     (cond
         ;The save button calls a function of the frame that being saveRoute and provides it with the necessary data for 
         ;this particular route to be saved in a json file
-        [(equal? save #t) (new button%[parent this][label "Save"][min-width 300][callback (lambda (o e)(send (send this get-parent) saveRoute start destination route timeTaken "save.json"))])]
-    )
+        [(equal? save #t) (new button%[parent this][label "Save"][min-width 300]
+                                    [callback (lambda (o e)(send (send this get-parent) saveRoute start destination route timeTaken "save.json"))])])
     (define hzpanel(new horizontal-panel%[parent this]))
     ;we create a back button which calls a function of the frame which keeps track of what screen the user is currently viewing 
     ;and returns them to the appropriate previous screen
@@ -307,9 +278,7 @@ in the way desired.|#
         (let ((data (send (send this get-parent) loadRoutes "save.json")))
             (cond
                 [(empty? data) (new message% [parent this][label "You have no Saved Routes"])]
-                [#t (set! routeInfo data)]
-            )
-        ) 
+                [#t (set! routeInfo data)]))
     ))
     ;This function allows us to switch screens to a route information screen, this version of the route information screen 
     ;should not allow us to save however as the route is already saved.
@@ -320,8 +289,7 @@ in the way desired.|#
             'dest dest
             'route route
             'time timeTaken
-            'save #f
-        ))
+            'save #f))
     ))
     ;helper function to check if a search parameter exists in a list
     (define/private isInData? (lambda (search data)
@@ -334,9 +302,7 @@ in the way desired.|#
             ;it then update the json file to reflect the change
             [(isInData? data routeInfo) 
                 (set! routeInfo(remove data routeInfo)) (clear pArg) (buildRoutes pArg routeInfo)
-                (send (send this get-parent) saveRoutes routeInfo "save.json")
-            ]
-        )
+                (send (send this get-parent) saveRoutes routeInfo "save.json")])
     ))
     ;takes a parent widget (a vertical panel) and a list of routes, loops through the list of routes and creates both a button 
     ;to view the route information page and a button to delete the route
@@ -345,16 +311,15 @@ in the way desired.|#
             [(empty? routeInfo)]
             [#t (for ([i routes])
                 (define n (new horizontal-panel%[parent parentArg][alignment (list 'center 'center)]))
-                (new button%[parent n][label (string-append (hash-ref i 'start) "->" (hash-ref i 'dest) " " (number->string(/ (round ( * 100 (hash-ref i 'time))) 100)))][callback (lambda (o e) (createRoutePage (hash-ref i 'start) (hash-ref i 'dest) (hash-ref i 'route) (hash-ref i 'time)))])
-                (new button%[parent n][label "Delete"][callback (lambda (o e)(deleteSavedRoute i parentArg))])
-            )]
-        )
+                (new button%[parent n][label (string-append (hash-ref i 'start) "->" (hash-ref i 'dest) " " 
+                                                            (number->string(/ (round ( * 100 (hash-ref i 'time))) 100)))]
+                [callback (lambda (o e) (createRoutePage (hash-ref i 'start) (hash-ref i 'dest) (hash-ref i 'route) (hash-ref i 'time)))])
+                (new button%[parent n][label "Delete"][callback (lambda (o e)(deleteSavedRoute i parentArg))]))])
     ))
     ;helper function which clears all the elements of a given widget
     (define/private clear (lambda (clearPanel)
         (for ([child (send clearPanel get-children)])
-            (send clearPanel delete-child child)
-        )
+            (send clearPanel delete-child child))
     ))
     ;sorts routes based off of their time taken to travel and updates routeInfo to reflect the change. The page is then rebuilt to display the new order
     (define/private sortRoutes (lambda (parentArg proc)
@@ -362,9 +327,7 @@ in the way desired.|#
             [(<= (length routeInfo) 1)]
             [#t (clear parentArg)
                 (set! routeInfo (sort routeInfo proc #:key (lambda (x)(hash-ref x 'time))))
-                (buildRoutes parentArg routeInfo)
-            ]
-        )
+                (buildRoutes parentArg routeInfo)])
     ))
     ;a function to create the sort buttons. These are only needed if the user does in fact have some routes saved
     (define/private buildButtons (lambda (hzPanel pArg)
@@ -374,10 +337,10 @@ in the way desired.|#
     ;filters and displays routes in which a given search parameter exists in either the start value or destination value of the route
     ;updates the vertical-panel to reflect the change
     (define/private search (lambda (textValue resultPanel)
-        (let ((filteredResults (filter (lambda (x) (or (string-contains? (string-downcase (hash-ref x 'dest)) (string-downcase textValue))(string-contains? (string-downcase (hash-ref x 'start)) (string-downcase textValue)))) routeInfo)))
+        (let ((filteredResults (filter (lambda (x) (or (string-contains? (string-downcase (hash-ref x 'dest)) (string-downcase textValue))
+                                                       (string-contains? (string-downcase (hash-ref x 'start)) (string-downcase textValue)))) routeInfo)))
             (clear resultPanel)
-            (buildRoutes resultPanel filteredResults)
-        )
+            (buildRoutes resultPanel filteredResults))
     ))
     ;loads the necessary data from a json file
     (loadData)
@@ -385,12 +348,10 @@ in the way desired.|#
         [(empty? routeInfo)]
         ;if we have saved routes then we create a search bar, a panel to display the saved routes as well as the buttons to 
         ;sort them. Then we display all the saved routes inside our panel
-        [#t 
-            (define searchBar (new text-field% [parent this][label "Search"][horiz-margin 50][callback (lambda (o e) (search (send searchBar get-value) vp))]))
+        [#t (define searchBar (new text-field% [parent this][label "Search"][horiz-margin 50][callback (lambda (o e) (search (send searchBar get-value) vp))]))
             (define vp (new vertical-panel% [parent this][style (list 'border 'vscroll)][horiz-margin 50]))
             (buildButtons (new horizontal-panel%[parent this][horiz-margin 50]) vp)
-            (buildRoutes vp routeInfo)
-        ]
+            (buildRoutes vp routeInfo)]
     )
     ;we create a back button to move us to our previous screen should we need to go back
     (new button%[parent this][label "Back"][callback (lambda (o e)(send (send this get-parent) popScreen))])
@@ -406,8 +367,7 @@ in the way desired.|#
     ;helper function to remove all child widgets
     (define/private clearScreen (lambda ()
         (for ([child (send this get-children)])
-            (send this delete-child child)
-        )
+            (send this delete-child child))
     ))
     ;helper function to store an object in a json file
     (define/private write-json-wrapper (lambda (jsexpr filename)
@@ -421,14 +381,12 @@ in the way desired.|#
     (define/public loadRoutes (lambda (filename)
         (cond
             [(file-exists? filename) (read-json-wrapper filename)]
-            [#t '()]
-        )
+            [#t '()])
     ))
     ;saves a list of routes to a json file. This is called when deleting a route
     (define/public saveRoutes (lambda (routeInformation filename)
         (cond
-            [(file-exists? filename) (write-json-wrapper routeInformation filename)]
-        )
+            [(file-exists? filename) (write-json-wrapper routeInformation filename)])
     ))
     ;saves a singular route at a time
     (define/public saveRoute (lambda(s d savedRoute approxTime filename)
@@ -443,25 +401,17 @@ in the way desired.|#
                                 'start s
                                 'dest d
                                 'route savedRoute
-                                'time approxTime
-                            )
-                        )
-                    ))
-                    (write-json-wrapper data filename)
-                )
-            ];if the file does not exist then we are creating the file for the first time and do not need to ready any data 
+                                'time approxTime))))
+                    (write-json-wrapper data filename))]
+            ;if the file does not exist then we are creating the file for the first time and do not need to ready any data 
             ;from the file. We simply write our data to the file.
             [else (let ((data (list 
                 (hash
                     'start s
                     'dest d
                     'route savedRoute
-                    'time approxTime
-                )
-            )))
-                (write-json-wrapper data filename)
-            )]
-        )
+                    'time approxTime))))
+                (write-json-wrapper data filename))])
     ))
     ;switches the scren back to a previous screen
     ;certain conditions are used to prevent the screens from looping on each other
@@ -470,8 +420,8 @@ in the way desired.|#
             [(equal? prevScreen "")]
             [(equal? prevScreen screen)]
             [(equal? prevScreen mainmenu%) (clearScreen) (set! screen prevScreen) (new prevScreen[parent this][vert-margin 50])]
-            [(and (equal? prevScreen savedRoutesPage%) (equal? screen routeInfoScreen%))(clearScreen) (set! screen prevScreen) (new prevScreen[parent this]) (set! prevScreen mainmenu%)]
-        )
+            [(and (equal? prevScreen savedRoutesPage%) (equal? screen routeInfoScreen%))
+                (clearScreen) (set! screen prevScreen) (new prevScreen[parent this]) (set! prevScreen mainmenu%)])
     ))
     ;switches from the current screen to a new screen. The new screen is a provided class. Some screens such as routeInfoScreen have specific 
     (define/public switchScreens (lambda (newScreen args)
@@ -490,12 +440,10 @@ in the way desired.|#
                     [destination (hash-ref args 'dest)]
                     [route (hash-ref args 'route)]
                     [timeTaken (hash-ref args 'time)]
-                    [save (hash-ref args 'save)]
-                    )]
+                    [save (hash-ref args 'save)])]
             ;if the screen does not need special arguments to build then we set the previous screen to our current screen and 
             ;our current screen to the new screen and then instantiate whatever this new screen is
-            [#t (clearScreen)(set! prevScreen screen)(set! screen newScreen) (new newScreen [parent this])]
-        )
+            [#t (clearScreen)(set! prevScreen screen)(set! screen newScreen) (new newScreen [parent this])])
     ))
 ))
 
