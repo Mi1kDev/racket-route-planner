@@ -15,6 +15,8 @@
     #|8: King's Cross St. Pancras|#(0 2 7 9)
     #|9: Holloway Road|#(8)
 ))
+
+(define stationLines '("northern" "northern" "piccadily" "piccadily" "northern" "northern" "northern" "northern" "piccadily" "piccadily"))
 ;Similar to the network structure but displays the distance from a station to its connected stations
 (define network-distances '(
     (2.4 3.0)
@@ -37,6 +39,7 @@
     (init-field (names network-names))
     (init-field (graph network-structure))
     (init-field (distances network-distances))
+    (init-field (trainLines stationLines))
 
     ;keeps track of the totalDistance travelled by each route
     (init-field (totalDistance 0))
@@ -83,7 +86,7 @@
     ;this function calculates the total distance travelled by each route as well as converting the route from simply indexes to actual formatted strings
     (define/public printReturnPaths (lambda ()
         ;a let function is used as some variables will be repeatedly used
-        (let ((newPath '()) (prevPath '()) (finalPath '()))
+        (let ((newPath '()) (lines '()) (finalPath '()))
             (cond
                 ;if there is nothing in the returnPath then we return this string. In this case all stations are connected so this should never occur.
                 [(empty? returnPath) "There is no path between these stations."]
@@ -94,6 +97,8 @@
                             [(not (equal? (list-ref (list-ref returnPath i) j) (last (list-ref returnPath i)))) (set! stringPath (string-append stringPath (list-ref names (list-ref (list-ref returnPath i) j)) " > "))]
                             [else (set! stringPath (string-append stringPath (list-ref names (list-ref (list-ref returnPath i) j))))]
                         )
+                        (set! lines (cons (list-ref trainLines (list-ref (list-ref returnPath i) j)) lines))
+                        
                         ;we total the distances of the station to the next in the route
                         (cond
                             [(< j (- (length (list-ref returnPath i)) 1)) (set! totalDistance  (+ totalDistance (list-ref (list-ref distances (list-ref (list-ref returnPath i) j)) (index-of (list-ref graph (list-ref (list-ref returnPath i) j))(list-ref (list-ref returnPath i) (+ 1 j))))))]
@@ -101,11 +106,12 @@
                     )
                     ;we append the formatted string and the distance travelled as both are needed values
                     ;this is done after looping through one individual route
-                    (set! newPath (list(list stringPath totalDistance)))
+                    (set! newPath (list(list stringPath totalDistance (reverse lines))))
                     ;we append this newPath to a list which will contain a list of  lists of route strings and total distances
                     (set! finalPath (append finalPath newPath))
                     
                     ;we then reset the total distance as well as the formatted string to be used in the next route
+                    (set! lines '())
                     (set! totalDistance 0)
                     (set! stringPath "")
                     
@@ -133,6 +139,5 @@
         )
     ))
 ))
-
 ;we provide the class so it can be imported in other racket programs for use
 (provide route-finder%)

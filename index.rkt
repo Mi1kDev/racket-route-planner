@@ -191,13 +191,15 @@ Followed by this, the other subclasses are called|#
         ))
         ;function to set the variables of the routeInformation page that the user will be taken to.
         ;sends the frame a call for the switchScreens function, passing in the parameters necessary to make each routeInformation screen unique
-        (define/private buildPage (lambda(routeStr distance)
+        (define/private buildPage (lambda(routeStr distance lines)
             (send (send (send this get-parent) get-parent) switchScreens routeInfoScreen% (hash 
                             'start currentStart
                             'dest currentDest
                             'route (convertRouteStringToRoute routeStr) 
                             'time (convertDistanceToTime distance)
-                            'save #t))
+                            'save #t
+                            'lines lines
+                            ))
         ))
         (define/public addChildren (lambda (results)
             ;clears all children of the panel
@@ -208,8 +210,8 @@ Followed by this, the other subclasses are called|#
                     ;conditions are used for some formatting. If the length of a route string is above a certain threshold then we make limit it to a certain length
                     ;each button will follow the format "A>B>C Approx. {time}"
                     ;every button has a callback which allows them to switch to a new routeInformation screen
-                    [(> (string-length (first i)) 40) (new button% [label (string-append (string-titlecase (substring (first i) 0 39)) "... "(number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] [parent this][callback (lambda (o e)(buildPage (first i) (second i)))])]
-                    [#t (new button% [label (string-append (string-titlecase (first i)) (number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] [parent this][callback (lambda (o e)(buildPage (first i) (second i)))])
+                    [(> (string-length (first i)) 40) (new button% [label (string-append (string-titlecase (substring (first i) 0 39)) "... "(number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] [parent this][callback (lambda (o e)(buildPage (first i) (second i) (third i)))])]
+                    [#t (new button% [label (string-append (string-titlecase (first i)) (number->string(/ (round (* 100 (convertDistanceToTime (second i))))100)))] [parent this][callback (lambda (o e)(buildPage (first i) (second i) (third i)))])
                     ]
                 )
             )
@@ -249,19 +251,38 @@ in the way desired.|#
     (init-field (save #f))
     (init-field (timeTaken 0))
     (init-field (timePassedIn ""))
+    (init-field (lines '()))
 
     ;a horizontal class to display the start and destination and arrange them
     (define hz% (class horizontal-panel%
         (super-new)
-        (new message%[parent this][horiz-margin 50][label (string-upcase (string-append start "->" destination))])
+        (new message%[parent this][horiz-margin 50][label (string-upcase (string-append start "->" destination))][font (send the-font-list find-or-create-font 8 "Arial" 'default 'normal 'bold)])
     ))
     (new hz% [parent this])
 
     ;A vertical panel to store each station within the route and display it as a message
     (define routeInformation% (class vertical-panel%
         (super-new)
-        (for ([i route])
-            (new message%[parent this][label (string-titlecase i)][auto-resize #t][min-width 350])
+        (define/private getColor (lambda (station)
+                (cond 
+                    [(equal? station "piccadily") "blue"]
+                    [(equal? station "northern") "black"]
+                ) 
+        ))
+        
+        (for ([i (in-range (length route))])
+            ;conditions to determine whether we need to change lines and displays when to change lines
+            (cond
+                [(and ( < i (-(length route)1)) (equal? (list-ref lines i) (list-ref lines (+ 1 i))))]
+                [(and ( < i (-(length route)1)) (not (equal? (list-ref lines i) (list-ref lines (+ 1 i)))))
+                    (cond
+                        [(and (< i (- (length route) 1)) (equal?  (list-ref route (+ 1 i)) (last route))) (new message%[parent this][label (string-append "Change to " (string-upcase (list-ref lines (+ 1 i))) " Line")][auto-resize #t][color (getColor (list-ref lines (+ 1 i)))][font (send the-font-list find-or-create-font 8 "Arial" 'default 'normal 'bold)])]
+                        [(and (< i (- (length route) 2)) (equal? (list-ref lines (+ 1 i)) (list-ref lines (+ 2 i)))) (new message%[parent this][label (string-append "Change to " (string-upcase (list-ref lines (+ 1 i))) " Line")][auto-resize #t][color (getColor (list-ref lines (+ 1 i)))][font (send the-font-list find-or-create-font 8 "Arial" 'default 'normal 'bold)])]
+                    )
+                ]
+            )
+            ;build and display message widgets for each given route
+            (new message%[parent this][label (string-titlecase (list-ref route i))][auto-resize #t][min-width 350])
         )
     ))
     (new routeInformation%[parent this][style (list 'border 'vscroll)][min-height 30][horiz-margin 50])
@@ -269,13 +290,13 @@ in the way desired.|#
     ;A class to hold information regarding the time needed to travel this route
     (define hzp% (class horizontal-panel%
         (super-new)
-        (new message%[parent this][horiz-margin 50][label (string-append (number->string (/(round(* 100 timeTaken))100)) "hrs")])
+        (new message%[parent this][horiz-margin 50][label (string-append (number->string (/(round(* 100 timeTaken))100)) "hrs")][font (send the-font-list find-or-create-font 8 "Arial" 'default 'normal 'bold)])
     ))
     (new hzp% [parent this])
     ;If when building this screen, a save tag is passed in then we should display a save button
     (cond
         ;The save button calls a function of the frame that being saveRoute and provides it with the necessary data for this particular route to be saved in a json file
-        [(equal? save #t) (new button%[parent this][label "Save"][min-width 300][callback (lambda (o e)(send (send this get-parent) saveRoute start destination route timeTaken "save.json"))])]
+        [(equal? save #t) (new button%[parent this][label "Save"][min-width 300][callback (lambda (o e)(send (send this get-parent) saveRoute start destination route timeTaken lines "save.json"))])]
     )
     (define hzpanel(new horizontal-panel%[parent this]))
     ;we create a back button which calls a function of the frame which keeps track of what screen the user is currently viewing and returns them to the appropriate previous screen
@@ -297,13 +318,14 @@ in the way desired.|#
     ))
     ;This function allows us to switch screens to a route information screen, this version of the route information screen should not allow us to save however as the route is already saved.
     ;As such we pass false into the save tag
-    (define/private createRoutePage (lambda (start dest route timeTaken)
+    (define/private createRoutePage (lambda (start dest route timeTaken lines)
         (send (send this get-parent) switchScreens routeInfoScreen% (hash
             'start start
             'dest dest
             'route route
             'time timeTaken
             'save #f
+            'lines lines
         ))
     ))
     ;helper function to check if a search parameter exists in a list
@@ -326,7 +348,7 @@ in the way desired.|#
             [(empty? routeInfo)]
             [#t (for ([i routes])
                 (define n (new horizontal-panel%[parent parentArg][alignment (list 'center 'center)]))
-                (new button%[parent n][label (string-append (hash-ref i 'start) "->" (hash-ref i 'dest) " " (number->string(/ (round ( * 100 (hash-ref i 'time))) 100)))][callback (lambda (o e) (createRoutePage (hash-ref i 'start) (hash-ref i 'dest) (hash-ref i 'route) (hash-ref i 'time)))])
+                (new button%[parent n][label (string-append (hash-ref i 'start) "->" (hash-ref i 'dest) " " (number->string(/ (round ( * 100 (hash-ref i 'time))) 100)))][callback (lambda (o e) (createRoutePage (hash-ref i 'start) (hash-ref i 'dest) (hash-ref i 'route) (hash-ref i 'time) (hash-ref i 'lines)))])
                 (new button%[parent n][label "Delete"][callback (lambda (o e)(deleteSavedRoute i parentArg))])
             )]
         )
@@ -410,7 +432,7 @@ in the way desired.|#
         )
     ))
     ;saves a singular route at a time
-    (define/public saveRoute (lambda(s d savedRoute approxTime filename)
+    (define/public saveRoute (lambda(s d savedRoute approxTime lines filename)
         (cond
             ;if the file exists already then reads the contents of the file and appends the new route to be saved to those contents before rewriting the file. Effectively merging the previous data with the new
             [(file-exists? filename)
@@ -422,6 +444,7 @@ in the way desired.|#
                                 'dest d
                                 'route savedRoute
                                 'time approxTime
+                                'lines lines
                             )
                         )
                     ))
@@ -434,6 +457,7 @@ in the way desired.|#
                     'dest d
                     'route savedRoute
                     'time approxTime
+                    'lines lines
                 )
             )))
                 (write-json-wrapper data filename)
@@ -466,6 +490,7 @@ in the way desired.|#
                     [route (hash-ref args 'route)]
                     [timeTaken (hash-ref args 'time)]
                     [save (hash-ref args 'save)]
+                    [lines (hash-ref args 'lines)]
                     )]
             ;if the screen does not need special arguments to build then we set the previous screen to our current screen and our current screen to the new screen and then instantiate whatever this new screen is
             [#t (clearScreen)(set! prevScreen screen)(set! screen newScreen) (new newScreen [parent this])]
