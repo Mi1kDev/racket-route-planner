@@ -1,7 +1,7 @@
 #lang racket/gui
 
 ;A list of the names of the various stations to easily map an index to the station name
-(define network-names '("euston" "tottenham court road" "leicester square" "green park" "waterloo" "kennington" "elephant and castle" "bank" "king's cross st. pancras" "hollow way road"))
+(define network-names '("euston" "tottenham court road" "leicester square" "green park" "waterloo" "kennington" "elephant and castle" "bank" "king's cross st. pancras" "holloway road"))
 ;A list of lists representing the layout of the network. Each index represents a station and the list at that index represents the connected stations
 (define network-structure '(
     #|0: Euston|#(1 8)
